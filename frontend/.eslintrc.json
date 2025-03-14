@@ -1,0 +1,29 @@
+// .eslintrc.json
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "plugins": ["react"],
+  "rules": {
+    "react/react-in-jsx-scope": "off", // 明确关闭规则
+    "react/jsx-uses-react": "off",      // 需要同时关闭
+    "react/prop-types": ["warn", { 
+      "ignore": ["children"], 
+      "customValidators": ["validateShape"] 
+    }],
+    "no-unused-vars": [
+      "warn", 
+      { 
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "no-debugger": "warn" // 改为警告而非错误
+  },
+  "settings": {
+    "react": {
+      "version": "detect" // 自动检测 React 版本
+    }
+  }
+}

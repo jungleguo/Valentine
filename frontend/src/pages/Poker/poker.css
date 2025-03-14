@@ -1,0 +1,189 @@
+.poker-table {
+  background: #2a5c2d;
+  min-height: 100vh;
+  padding: 2rem;
+  color: white;
+}
+
+.game-phase {
+  display: flex;
+  justify-content: center;
+}
+
+.players-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.community-cards {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 3rem 0;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 10px;
+}
+
+.player-score {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 10px;
+
+  Span {
+    margin-right: 10px;
+  }
+}
+
+.player-hand {
+  display: flex;
+  flex-direction: row;
+}
+
+.poker-card {
+  background: white;
+  width: 80px;
+  height: 120px;
+  border-radius: 8px;
+  padding: 10px;
+  margin-right: 10px;
+  display: flex;
+  flex-direction: column;
+  /* 修改1：主轴居中 */
+  justify-content: center;
+  /* 修改2：交叉轴居中 */
+  color: #2a2a2a;
+  /* 新增3：添加卡片立体效果 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+
+  /* 修改4：创建独立布局容器 */
+  .rank,
+  .suit {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    /* 新增5：使用弹性扩展 */
+    flex: 1;
+    font-size: 1.5em;
+    /* 放大字号 */
+    font-weight: bold;
+    /* 新增6：添加文字阴影提升可读性 */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+    /* 修改7：优化符号定位 */
+    &:first-child {
+      justify-content: flex-start;
+    }
+
+    &:last-child {
+      align-self: flex-end;
+      /* transform: rotate(180deg); */
+    }
+
+    &.♥,
+    &.♦ {
+      color: #ff4444;
+    }
+
+    &.♠,
+    &.♣ {
+      color: #2a2a2a;
+    }
+  }
+
+  &::after {
+    content: attr(data-suit);
+    position: absolute;
+    font-size: 3em;
+    opacity: 0.15;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
+  }
+}
+
+.back {
+  background-color: #e1a6a6;
+  background-image: linear-gradient(90deg, rgba(213, 15, 15, 0.15) 10%, rgba(0, 0, 0, 0) 10%), linear-gradient(180deg, rgba(219, 20, 20, 0.15) 10%, rgba(0, 0, 0, 0) 10%);
+  background-size: 20px 20px;
+}
+
+.player-seat {
+  width: 20%;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  border-radius: 10px;
+  margin: 1rem;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.current-user {
+  display: flex;
+  justify-content: center;
+}
+
+.player-seat.active {
+  border: 2px solid #ffd700;
+}
+
+.controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+}
+
+button {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #4CAF50;
+  color: white;
+}
+
+/* 筹码样式 */
+.chip {
+  background: gold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #c5a020;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pot-display {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1rem 2rem;
+  border-radius: 10px;
+}
+
+/* 折叠状态 */
+.player-seat.folded {
+  opacity: 0.5;
+  filter: grayscale(100%);
+}
+
+/* 输入控件 */
+input[type="number"] {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 120px;
+}
