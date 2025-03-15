@@ -14,9 +14,10 @@ import java.util.Map;
 @Setter
 public class GameContext {
     public int currentBetLevel;
-    public int pot;
+    public int requiredCallAmount;
     public int dealerIndex;
     public PlayerDTO actionPlayer;
+    public PlayerDTO lastRaiser;
     public PlayerDTO dealer;
     public PlayerDTO smallBlind;
     public PlayerDTO bigBlind;
@@ -34,9 +35,9 @@ public class GameContext {
 
     public void rotateContext() {
         this.currentBetLevel = 0;
-        this.pot = 0;
         this.dealerIndex = 0;
         this.actionPlayer = null;
+        this.lastRaiser = null;
         this.dealer = null;
         this.smallBlind = null;
         this.bigBlind = null;
@@ -44,6 +45,13 @@ public class GameContext {
         state = GameState.INIT;
         communityCards.clear();
         pools.clear();
+    }
+
+    public void resetState() {
+        this.currentBetLevel = 0;
+        this.requiredCallAmount = 0;
+        this.lastRaiser = null;
+        this.players.forEach(PlayerDTO::resetRoundState);
     }
 
     public void initialPlayers(List<GamePlayer> players) {
@@ -77,8 +85,9 @@ public class GameContext {
         if (currentResult.isPresent()) {
             var existPlayer = currentResult.get();
             existPlayer.isActive = player.isActive;
+            existPlayer.actedThisRound = player.actedThisRound;
             existPlayer.chips = player.chips;
-            existPlayer.bets = player.currentBet;
+            existPlayer.currentBets = player.currentBet;
         }
     }
 
@@ -91,10 +100,6 @@ public class GameContext {
     }
 
     public void setWinners(List<GamePlayer> players) {
-//        for (GamePlayer p: players) {
-//            var existsWinner = this.winners.stream().filter(i -> i.userId.equals(p.id)).findFirst();
-//            if (existsWinner.isEmpty())
-//                this.winners.add(p.toPlayerDTO());
-//        }
+
     }
 }

@@ -39,6 +39,13 @@ public class Deck {
         dealIndex = 0;
     }
 
+    public void burnCard() {
+        if (dealIndex >= cards.size()) {
+            throw new IllegalStateException("No cards left to burn");
+        }
+        dealIndex++;
+    }
+
     public Poker dealCard() {
         return cards.get(dealIndex++);
     }

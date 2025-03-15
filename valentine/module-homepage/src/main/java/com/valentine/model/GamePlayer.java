@@ -13,6 +13,7 @@ public class GamePlayer {
     public int currentBet;
     public boolean isActive = true;
     public EvaluatedHand best;
+    public boolean actedThisRound = false;
 
     public GamePlayer(
             String id,
@@ -25,7 +26,7 @@ public class GamePlayer {
 
     public void resetRoundState() {
         currentBet = 0;
-        holeCards.clear();
+        actedThisRound = false;
     }
 
     public PlayerDTO toPlayerDTO() {
@@ -33,8 +34,9 @@ public class GamePlayer {
         playerDTO.userId = this.id;
         playerDTO.userName = this.username;
         playerDTO.isActive = this.isActive;
+        playerDTO.actedThisRound = this.actedThisRound;
         playerDTO.chips = this.chips;
-        playerDTO.bets = this.currentBet;
+        playerDTO.currentBets = this.currentBet;
         return playerDTO;
     }
 }

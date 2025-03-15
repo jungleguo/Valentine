@@ -3,10 +3,6 @@ package com.valentine.service;
 import com.valentine.model.*;
 import jakarta.ws.rs.NotFoundException;
 
-import java.time.Instant;
-import java.time.chrono.MinguoDate;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalField;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,16 +14,18 @@ public class TexasHoldemEngine {
     private GameState currentState = GameState.INIT;
     private int pot = 0;
     private int currentBetLevel = 0;
+    private int requiredCallAmount = 0;
     private GamePlayer dealer;
     private int smallBlind = 5;
     private int bigBlind = 10;
     private GamePlayer currentActionPlayer;
+    private GamePlayer lastRaiser;
     public GameContext gameContext;
     private List<GamePlayer> winners;
 
     public void initilizeGame(List<GamePlayer> players) {
         this.players.addAll(players);
-        var initialFirstDealerIndex = (int)(Math.random() * 100)  % this.players.size();
+        var initialFirstDealerIndex = (int) (Math.random() * 100) % this.players.size();
         this.dealer = players.get(initialFirstDealerIndex);
         deck.shuffle();
 
@@ -58,6 +56,12 @@ public class TexasHoldemEngine {
         if (!currentPlayer.id.equals(this.currentActionPlayer.id))
             throw new IllegalArgumentException("现在应该由" + this.currentActionPlayer.username + "话事.");
 
+        if (action.action.equals(PlayerAction.CHECK)) {
+            if (this.requiredCallAmount != 0) {
+                throw new IllegalArgumentException("现在底池还未配平");
+            }
+        }
+
         if (action.action.equals(PlayerAction.CALL) && !currentPlayer.id.equals(this.gameContext.smallBlind.userId)) {
             if (action.bet < currentBetLevel && currentPlayer.chips >= currentBetLevel)
                 throw new IllegalArgumentException("Call amount should at least equal or greater than current bet level: " + currentBetLevel);
@@ -83,12 +87,15 @@ public class TexasHoldemEngine {
         // 更新下注后当前 User 的状态
         this.gameContext.updatePlayer(currentPlayer);
         this.gameContext.updatePool(currentPool);
+        this.gameContext.currentBetLevel = this.currentBetLevel;
+        this.gameContext.requiredCallAmount = this.requiredCallAmount;
 
         var activePlayers = getActivePlayers();
         // Active user 只有一个人，则 Active User 自动成为 Winner
         if (activePlayers.size() == 1) {
             var winner = getNextActivePlayer(currentPlayer);
             // 修改游戏状态
+            settlement();
         }
 
         // 如果剩下的 Active user 大于 2 人，并且有 all in 的 user, 那就要为没有 all in 的 player 开边池
@@ -117,37 +124,62 @@ public class TexasHoldemEngine {
     }
 
     private boolean isBalanced() {
+        boolean allActed = players.stream()
+                .filter(i -> i.isActive)
+                .allMatch(i -> i.actedThisRound);
+
+        boolean betsBalanced = players.stream()
+                .filter(i -> i.isActive)
+                .mapToInt(i -> i.currentBet)
+                .allMatch(bet -> bet == currentBetLevel);
+
+        boolean noPendingRaise = (lastRaiser == null) ||
+                players.stream()
+                        .filter(i -> i != lastRaiser)
+                        .filter(i -> i.isActive)
+                        .allMatch(p -> p.currentBet == currentBetLevel);
+
         // 当前 Active 并且还有筹码的 Player 下注相同了，就说明已经配平了
-        return players.stream().filter(p -> p.isActive && p.chips > 0)
-                .collect(Collectors.groupingBy(i -> i.currentBet))
-                .size() == 1;
+        return allActed && betsBalanced && noPendingRaise;
     }
 
     public void process(GamePlayer player, PotPool pool, PlayerAction action, int bet) {
         switch (action) {
             case FOLD:
                 player.isActive = false;
+                player.actedThisRound = true;
+                break;
+            case CHECK:
+                player.currentBet = 0;
+                player.actedThisRound = true;
                 break;
             case CALL:
                 player.chips -= bet;
                 pool.pot += bet;
                 player.currentBet += bet;
                 pool.onBetting(player);
+                player.actedThisRound = true;
                 break;
             case RAISE:
                 player.chips -= bet;
                 pool.pot += bet;
                 player.currentBet += bet;
+                requiredCallAmount = bet - currentBetLevel;
                 currentBetLevel = player.currentBet;
                 pool.onBetting(player);
+                lastRaiser = player;
+                player.actedThisRound = true;
                 break;
             case ALL_IN:
                 pool.pot += player.chips;
                 player.currentBet += player.chips;
                 player.chips = 0;
-                if (player.currentBet > currentBetLevel)
+                if (player.currentBet > currentBetLevel) {
+                    requiredCallAmount = player.currentBet - currentBetLevel;
                     currentBetLevel = player.currentBet;
+                }
                 pool.onBetting(player);
+                player.actedThisRound = true;
                 break;
             default:
                 break;
@@ -225,6 +257,7 @@ public class TexasHoldemEngine {
 
     private void dealCommunityCards(int count) {
         for (int i = 0; i < count; i++) {
+            deck.burnCard();
             commmunityCards.add(deck.dealCard());
         }
     }
@@ -232,11 +265,14 @@ public class TexasHoldemEngine {
     private void postBlinds() {
         GamePlayer smallBlindPlayer = getNextActivePlayer(dealer);
         GamePlayer bigBlindPlayer = getNextActivePlayer(smallBlindPlayer);
+        int pot = 0;
 
         smallBlindPlayer.chips -= smallBlind;
+        smallBlindPlayer.currentBet = smallBlind;
         pot += smallBlind;
 
         bigBlindPlayer.chips -= bigBlind;
+        bigBlindPlayer.currentBet = bigBlind;
         pot += bigBlind;
 
         currentBetLevel = bigBlind;
@@ -252,11 +288,12 @@ public class TexasHoldemEngine {
         currentActionPlayer = getNextActivePlayer(bigBlindPlayer);
         this.gameContext.setSmallBlind(smallBlindPlayer.toPlayerDTO());
         this.gameContext.setBigBlind(bigBlindPlayer.toPlayerDTO());
+        this.gameContext.updatePlayer(smallBlindPlayer);
+        this.gameContext.updatePlayer(bigBlindPlayer);
         this.gameContext.setCurrentBetLevel(currentBetLevel);
         this.gameContext.setActionPlayer(currentActionPlayer.toPlayerDTO());
         this.gameContext.setState(this.currentState);
         this.gameContext.initialPotPool(poolIndex, pool);
-        this.gameContext.setPot(pot);
     }
 
     private void determineWinner() {
@@ -375,6 +412,7 @@ public class TexasHoldemEngine {
                 dealCommunityCards(3);
                 this.gameContext.updateCommunityCards(this.commmunityCards);
                 this.gameContext.setState(this.currentState);
+                resetBettingState();
                 break;
             case FLOP:
                 this.currentState = GameState.TURN;
@@ -383,6 +421,7 @@ public class TexasHoldemEngine {
                 this.gameContext.updateCommunityCards(this.commmunityCards);
                 // 下一轮投注
                 this.gameContext.setState(this.currentState);
+                resetBettingState();
                 break;
             case TURN:
                 this.currentState = GameState.RIVER;
@@ -391,6 +430,7 @@ public class TexasHoldemEngine {
                 this.gameContext.updateCommunityCards(this.commmunityCards);
                 // 下一轮投注
                 this.gameContext.setState(this.currentState);
+                resetBettingState();
                 break;
             case RIVER:
                 this.currentState = GameState.SHOWDOWN;
@@ -410,20 +450,28 @@ public class TexasHoldemEngine {
     }
 
     private void settlement() {
-        for (GamePlayer player : this.players) {
+        for (GamePlayer player : this.players.stream().filter(i -> i.isActive).toList()) {
             var allCards = new ArrayList<Poker>(player.holeCards);
             allCards.addAll(this.commmunityCards);
             player.best = PokerHandEvaluator.generateCombinations(allCards)
                     .stream().map(PokerHandEvaluator::evaluate)
                     .max(Comparator.naturalOrder())
                     .get();
+            this.gameContext.updatePlayer(player);
         }
 
-        this.winners = this.players.stream()
-                .collect(Collectors.groupingBy(i -> i.best))
-                .entrySet()
-                .stream().findFirst()
-                .map(Map.Entry::getValue).get();
+        for (PotPool pool: this.pools.values()) {
+            pool.onSettlement();
+            this.gameContext.updatePool(pool);
+        }
+    }
+
+    private void resetBettingState() {
+        currentBetLevel = 0;
+        requiredCallAmount = 0;
+        lastRaiser = null;
+        this.players.forEach(GamePlayer::resetRoundState);
+        this.gameContext.resetState();
     }
 
     private void rotateDealer() {

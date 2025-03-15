@@ -27,6 +27,7 @@ public class PotPool {
 
     public void onSettlement() {
         this.winners = this.players.stream()
+                .filter(i -> i.isActive)
                 .collect(Collectors.groupingBy(i -> i.best))
                 .entrySet()
                 .stream().findFirst()

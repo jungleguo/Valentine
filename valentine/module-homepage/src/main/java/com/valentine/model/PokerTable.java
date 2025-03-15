@@ -44,21 +44,10 @@ public class PokerTable {
         if (deck == null)
             deck = Poker.createDeck();
 
-//        if (players.size() <= 1) {
-//            initialUsers();
-//        }
-
         var gamePlayers = initialUsers();
         this.holdemEngine.initilizeGame(gamePlayers);
         this.holdemEngine.startGame();
-//        if (round == 0)
-//            dealerIndex = chooseDealer();
-//
-//        // At the start of each round , the first active user should be the Gun
-//        currentActiveIndex = dealerIndex + 3;
-//        chipPools.put(0, new ChipPool());
-//
-//        initialUserRole(dealerIndex);
+
     }
 
     public GameContext processAction(GameUserAction action) {
