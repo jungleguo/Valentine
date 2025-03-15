@@ -12,7 +12,7 @@ public class HomeController {
     }
 
     // 处理其他前端路由（用于支持 React Router）
-    @GetMapping(value = { "/{path:[^\\.]*}", "/{path:^(?!api$).*}" })
+    @GetMapping(value = { "/{path:[^\\.]*}" })
     public String redirect() {
         return "forward:/index.html";
     }
