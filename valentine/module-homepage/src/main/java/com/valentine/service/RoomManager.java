@@ -1,9 +1,13 @@
 package com.valentine.service;
 
+import com.valentine.DTO.CreateRoomRequestDTO;
+import com.valentine.DTO.PlayerDTO;
+import com.valentine.DTO.RoomDTO;
 import com.valentine.model.Player;
 import com.valentine.model.PokerRoom;
 import com.valentine.model.PokerTable;
 import jakarta.websocket.Session;
+import jakarta.ws.rs.NotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -40,15 +44,15 @@ public class RoomManager {
     @Value("${room.cleanup.inactive-minutes:30}")
     private int maxInactiveMinutes;
 
-    public PokerRoom createRoom(Player creator) {
+    public RoomDTO createRoom(CreateRoomRequestDTO requestDTO) {
         String roomId = generateRoomId();
         PokerRoom room = new PokerRoom();
         room.setRoomId(roomId);
-        room.setCreatorId(creator.getId());
-        room.getPlayers().put(room.getPlayers().size(), creator);
+        room.setRoomName(requestDTO.roomName);
+        room.setCreatorId(requestDTO.creatorId);
         rooms.put(roomId, room);
 
-        return room;
+        return room.ToDTO();
     }
 
     public PokerRoom joinRoom(String roomId, Player player) throws IllegalStateException {
@@ -62,6 +66,16 @@ public class RoomManager {
 
     public Optional<PokerRoom> getRoom(String roomId) {
         return Optional.ofNullable(rooms.get(roomId));
+    }
+
+    public List<PlayerDTO> getRoomPlayers(String roomId) {
+        var room = this.getRoom(roomId);
+
+        if (room.isEmpty())
+            throw new NotFoundException("Room doesn't exist.");
+
+        return room.get().getGameContext()
+                .getPlayers();
     }
 
     public PokerRoom startPoker(String roomId) {
@@ -110,7 +124,7 @@ public class RoomManager {
     public void addUserToRoom(String roomId, String userId, Session session) {
         PokerRoom room = rooms.getOrDefault(roomId, null);
 
-        if (room == null){
+        if (room == null) {
             log.warn("Room doesn't exists. Please confirm.");
             return;
         }

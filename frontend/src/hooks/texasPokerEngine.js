@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const initState = {
     "currentBetLevel": 0,
@@ -205,6 +206,7 @@ export default function usePokerEngine() {
     const [pools, setPools] = useState([]);
     const [gameState, setGameState] = useState();
     const [currentHand, setCurrentHand] = useState([]);
+    const [error, setError] = useState();
 
     useEffect(() => initializeGame(initState), []);
 
@@ -231,6 +233,16 @@ export default function usePokerEngine() {
             }
         ])
     };
+
+    const handleStart = async (roomId) => {
+        try {
+            var response = await axios.get(`http://localhost:8080/api/rooms/${roomId}/startpoker`)
+            initializeGame(response.data);
+        }catch(err) {
+            setError("Failed to start game"),
+            console.log(err);
+        }
+    }
 
     const handleUserAction = (action) => {
 
@@ -261,6 +273,7 @@ export default function usePokerEngine() {
         communityCards,
         pools,
         gameState,
+        handleStart,
         handleBet,
         handleFold,
         progressPhase

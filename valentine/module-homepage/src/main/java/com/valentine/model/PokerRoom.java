@@ -1,5 +1,6 @@
 package com.valentine.model;
 
+import com.valentine.DTO.RoomDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
@@ -8,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PokerRoom {
     private String roomId;
+    private String roomName;
     private String creatorId;
     private Instant createdTime = Instant.now();
     private Instant lastActiveTime = Instant.now();
@@ -15,7 +17,7 @@ public class PokerRoom {
     private int maxPlayers = 8;
     private RoomStatus status = RoomStatus.WAITING;
 
-    private PokerTable pokerTable;
+    private PokerTable pokerTable = new PokerTable();
 
     public void setRoomId(String roomId) {
         this.roomId = roomId;
@@ -77,10 +79,26 @@ public class PokerRoom {
         return pokerTable.getGameContext();
     }
 
+    public String getRoomName() {
+        return roomName;
+    }
+
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
     public enum RoomStatus {WAITING, IN_GAME, CLOSED}
 
     // 构造器/getters/setters
     public boolean canJoin() {
         return status == RoomStatus.WAITING && players.size() < maxPlayers;
+    }
+
+    public RoomDTO ToDTO() {
+        var dto = new RoomDTO();
+        dto.roomId = this.roomId;
+        dto.roomName = this.roomName;
+        dto.maxPlayers = this.maxPlayers;
+        return dto;
     }
 }

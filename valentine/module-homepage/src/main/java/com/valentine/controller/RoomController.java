@@ -1,5 +1,6 @@
 package com.valentine.controller;
 
+import com.valentine.DTO.CreateRoomRequestDTO;
 import com.valentine.model.GameUserAction;
 import com.valentine.model.Player;
 import com.valentine.model.PokerRoom;
@@ -22,13 +23,10 @@ public class RoomController {
     private RoomManager roomManager;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createRoom(@RequestBody Player creator) {
+    public ResponseEntity<?> createRoom(@RequestBody CreateRoomRequestDTO requestDTO) {
         System.out.println("Create one room");
-        PokerRoom room = roomManager.createRoom(creator);
-        return ResponseEntity.ok(Map.of(
-                "roomId", room.getRoomId(),
-                "players", room.getPlayers()
-        ));
+        var room = roomManager.createRoom(requestDTO);
+        return ResponseEntity.ok(room);
     }
 
     @PostMapping("/{roomId}/join")
@@ -52,6 +50,14 @@ public class RoomController {
         return roomManager.getRoom(roomId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{roomId}/users")
+    public ResponseEntity<?> getRoomUsers(
+            @PathVariable String roomId
+    ) {
+        var players = roomManager.getRoomPlayers(roomId);
+        return ResponseEntity.ok(players);
     }
 
     @GetMapping("/{roomId}/startpoker")

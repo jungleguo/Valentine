@@ -1,5 +1,6 @@
 package com.valentine.model;
 
+import com.valentine.DTO.PlayerDTO;
 import lombok.Getter;
 import lombok.Setter;
 
