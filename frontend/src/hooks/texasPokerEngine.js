@@ -4,198 +4,19 @@ import axios from 'axios';
 const initState = {
     "currentBetLevel": 0,
     "requiredCallAmount": 0,
-    "actionPlayer": {
-        "userId": "player5",
-        "userName": "player5",
-        "isActive": true,
-        "actedThisRound": false,
-        "chips": 955,
-        "currentBets": 0
-    },
-    "dealer": {
-        "userId": "player6",
-        "userName": "player6",
-        "isActive": true,
-        "actedThisRound": false,
-        "chips": 1000,
-        "currentBets": 0
-    },
-    "smallBlind": {
-        "userId": "player7",
-        "userName": "player7",
-        "isActive": true,
-        "actedThisRound": false,
-        "chips": 995,
-        "currentBets": 5
-    },
-    "bigBlind": {
-        "userId": "player0",
-        "userName": "player0",
-        "isActive": true,
-        "actedThisRound": false,
-        "chips": 990,
-        "currentBets": 10
-    },
-    "players": [
-        {
-            "userId": "player0",
-            "userName": "player0",
-            "isActive": false,
-            "actedThisRound": false,
-            "chips": 990,
-            "currentBets": 0
-        },
-        {
-            "userId": "player1",
-            "userName": "player1",
-            "isActive": false,
-            "actedThisRound": false,
-            "chips": 1000,
-            "currentBets": 0
-        },
-        {
-            "userId": "player2",
-            "userName": "player2",
-            "isActive": false,
-            "actedThisRound": false,
-            "chips": 1000,
-            "currentBets": 0
-        },
-        {
-            "userId": "player3",
-            "userName": "player3",
-            "isActive": false,
-            "actedThisRound": false,
-            "chips": 990,
-            "currentBets": 0
-        },
-        {
-            "userId": "player4",
-            "userName": "player4",
-            "isActive": true,
-            "actedThisRound": true,
-            "chips": 955,
-            "currentBets": 0
-        },
-        {
-            "userId": "player5",
-            "userName": "player5",
-            "isActive": true,
-            "actedThisRound": true,
-            "chips": 955,
-            "currentBets": 0
-        },
-        {
-            "userId": "player6",
-            "userName": "player6",
-            "isActive": false,
-            "actedThisRound": false,
-            "chips": 1000,
-            "currentBets": 0
-        },
-        {
-            "userId": "player7",
-            "userName": "player7",
-            "isActive": false,
-            "actedThisRound": false,
-            "chips": 995,
-            "currentBets": 0
-        }
-    ],
+    "actionPlayer": null,
+    "dealer": null,
+    "smallBlind": null,
+    "bigBlind": null,
+    "players": [],
     "state": "PRE_FLOP",
-    "communityCards": [
-        {
-            "id": "4♠",
-            "rank": "4",
-            "suit": "♠",
-            "value": 4
-        },
-        {
-            "id": "8♦",
-            "rank": "8",
-            "suit": "♦",
-            "value": 8
-        },
-        {
-            "id": "8♥",
-            "rank": "8",
-            "suit": "♥",
-            "value": 8
-        },
-        {
-            "id": "4♥",
-            "rank": "4",
-            "suit": "♥",
-            "value": 4
-        },
-        {
-            "id": "9♦",
-            "rank": "9",
-            "suit": "♦",
-            "value": 9
-        }
-    ],
-    "pools": {
-        "0": {
-            "id": 0,
-            "pot": 115,
-            "players": [
-                {
-                    "userId": "player7",
-                    "userName": "player7",
-                    "isActive": false,
-                    "actedThisRound": false,
-                    "chips": 995,
-                    "currentBets": 0
-                },
-                {
-                    "userId": "player0",
-                    "userName": "player0",
-                    "isActive": false,
-                    "actedThisRound": false,
-                    "chips": 990,
-                    "currentBets": 0
-                },
-                {
-                    "userId": "player3",
-                    "userName": "player3",
-                    "isActive": false,
-                    "actedThisRound": false,
-                    "chips": 990,
-                    "currentBets": 0
-                },
-                {
-                    "userId": "player4",
-                    "userName": "player4",
-                    "isActive": true,
-                    "actedThisRound": true,
-                    "chips": 1070,
-                    "currentBets": 0
-                },
-                {
-                    "userId": "player5",
-                    "userName": "player5",
-                    "isActive": true,
-                    "actedThisRound": true,
-                    "chips": 955,
-                    "currentBets": 0
-                }
-            ],
-            "winners": [
-                {
-                    "userId": "player4",
-                    "userName": "player4",
-                    "isActive": true,
-                    "actedThisRound": true,
-                    "chips": 1070,
-                    "currentBets": 0
-                }
-            ]
-        }
-    }
+    "communityCards": [],
+    "pools": {}
 };
 
-export default function usePokerEngine() {
+export default function usePokerEngine(roomId) {
+    const [currentBetLevel, setCurrentBetLevel] = useState(0);
+    const [requiredCallAmount, setRequiredCallAmount] = useState(0);
     const [dealer, setDealer] = useState();
     const [actionUser, setActionUser] = useState();
     const [smallBlind, setSmallBlind] = useState();
@@ -203,12 +24,16 @@ export default function usePokerEngine() {
     const [players, setPalyers] = useState([]);
     const [userCards, setUserCards] = useState([]);
     const [communityCards, setCommunityCards] = useState([]);
-    const [pools, setPools] = useState([]);
+    const [pools, setPools] = useState({});
     const [gameState, setGameState] = useState();
     const [currentHand, setCurrentHand] = useState([]);
     const [error, setError] = useState();
 
-    useEffect(() => initializeGame(initState), []);
+    useEffect(() => {
+        refreshTable(roomId);
+        const interval = setInterval(() => refreshTable(roomId), 60000);
+        return () => clearInterval(interval);
+    }, []);
 
     const initializeGame = (state) => {
         setActionUser(state.actionPlayer);
@@ -237,32 +62,71 @@ export default function usePokerEngine() {
     const handleStart = async (roomId) => {
         try {
             var response = await axios.get(`http://localhost:8080/api/rooms/${roomId}/startpoker`)
+            console.log("Start game response", response.data);
             initializeGame(response.data);
-        }catch(err) {
-            setError("Failed to start game"),
-            console.log(err);
+        } catch (err) {
+            setError("Failed to start game");
         }
     }
 
-    const handleUserAction = (action) => {
+    const refreshTable = async (roomId) => {
+        try {
+            var response = await axios.get(`http://localhost:8080/api/rooms/${roomId}/pokertable`)
+            initializeGame(response.data);
+        } catch (err) {
+            setError(err);
+        }
+    }
 
+    const handleUserAction = async ({ roomId, action }) => {
+        try {
+            var response = await axios.post(`http://localhost:8080/api/rooms/${roomId}/process`, action);
+            console.log("Handle process response", response.data);
+            initializeGame(response.data);
+        } catch (err) {
+            setError(err);
+        }
     };
 
-    const handleBet = (amount) => {
+    const handleBet = ({ roomId, player, amount }) => {
+        let userAction = "CALL";
 
+        if (requiredCallAmount == 0 && amount == 0)
+            userAction = "CHECK";
+        else if (amount >= player.chips) {
+            amount = player.chips;
+            userAction = "ALLIN";
+        } else if (amount == requiredCallAmount && amount < player.chips) {
+            userAction = "CALL";
+        } else if (amount >= requiredCallAmount * 2 && amount < player.chips) {
+            userAction = "RAISE";
+        }
+debugger
+        let poolId = pools[0].id;
+
+        debugger
+        const action = {
+            userId: player.userId,
+            action: userAction,
+            bet: amount,
+            poolId: poolId
+        };
+        handleUserAction({ roomId, action });
     };
 
     // 弃牌处理
-    const handleFold = () => {
-
-    };
-
-    // 阶段推进
-    const progressPhase = () => {
-
+    const handleFold = ({ roomId, player }) => {
+        const action = {
+            userId: player.userId,
+            action: "FOLD",
+            bet: 0,
+            poolId: 0
+        };
+        handleUserAction({ roomId, action });
     };
 
     return {
+        requiredCallAmount,
         currentUser: actionUser,
         currentHand,
         dealer,
@@ -273,9 +137,8 @@ export default function usePokerEngine() {
         communityCards,
         pools,
         gameState,
-        handleStart,
         handleBet,
         handleFold,
-        progressPhase
+        handleStart
     }
 }

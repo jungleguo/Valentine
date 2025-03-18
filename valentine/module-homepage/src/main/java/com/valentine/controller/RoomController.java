@@ -64,8 +64,8 @@ public class RoomController {
     public ResponseEntity<?> startPoker(
             @PathVariable String roomId
     ) {
-        PokerRoom room = roomManager.startPoker(roomId);
-        return ResponseEntity.ok(room);
+        var gameContext = roomManager.startPoker(roomId);
+        return ResponseEntity.ok(gameContext);
     }
 
     @GetMapping("/{roomId}/pokertable")

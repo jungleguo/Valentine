@@ -79,6 +79,20 @@ export default function useRoomPage() {
         setPassword(password);
     }
 
+    const handleStartGame = async (roomId) => {
+
+        setIsLoading(true);
+        try {
+            var response = await axios.get(`http://localhost:8080/api/room/${roomId}/startpoker`);
+
+            console.log("Room Page", response.data);
+        } catch (err) {
+            setError("开始游戏失败");
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     if (isLoading) return <div>Loading rooms...</div>;
     if (error) return <div className="error">{error}</div>;
 

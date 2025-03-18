@@ -3,10 +3,15 @@ import CommunityCards from '../../components/game/CommunityCards';
 import PlayerSeat from '../../components/game/PlayerSeat';
 import ActionControls from '../../components/game/ActionControls';
 import PotDisplay from '../../components/game/PotDisplay'
+import GameStartButton from '../../components/game/GameStartButton';
+import { useParams } from 'react-router-dom';
 import "./poker.css"
 
 export default function PokerTable() {
+  const { roomId } = useParams();
+console.log("Current roomId", roomId)
   const {
+    requiredCallAmount,
     currentUser,
     currentHand,
     dealer,
@@ -19,8 +24,24 @@ export default function PokerTable() {
     gameState,
     handleBet,
     handleFold,
-    progressPhase
-  } = usePokerEngine();
+    handleStart
+  } = usePokerEngine(roomId);
+
+  const getBlindTag = (player) => {
+    if (!player)
+      return null;
+
+    if (player.userId == smallBlind.userId)
+      return "S";
+
+    if (player.userId == bigBlind.userId)
+      return "B";
+
+    if (player.userId == dealer.userId)
+      return "D";
+
+    return null;
+  }
 
   return (
     <div className="poker-table">
@@ -30,6 +51,7 @@ export default function PokerTable() {
           <PlayerSeat
             key={index}
             player={player}
+            tagDescription={getBlindTag(player)}
             isActive={player.userId === currentUser.userId}
             isFolded={player.isFolded}
           />
@@ -54,14 +76,26 @@ export default function PokerTable() {
           isFolded={false} />
         }
       </div>
+      {
+        <GameStartButton
+          canStart={true}
+          isLoading={false}
+          error={''}
+          onStart={() => handleStart(roomId)}
+          playersCount={2}
+        />
+      }
+      {
+        <ActionControls
+          roomId={roomId}
+          requiredCallAmount={requiredCallAmount}
+          currentUser={currentUser}
+          onBet={handleBet}
+          onFold={handleFold}
+          phase={gameState}
+        />
+      }
 
-      {/* <PotDisplay amount={pot} /> */}
-      <ActionControls
-        onBet={handleBet}
-        onFold={handleFold}
-        onNextPhase={progressPhase}
-        phase={gameState}
-      />
     </div>
   );
 }

@@ -1,8 +1,14 @@
 import Chip from './Chip';
+import BlindTag from './BlindTag';
 
-export default function PlayerSeat({ player, handCards, isActive, isFolded }) {
+export default function PlayerSeat({
+  player,
+  handCards,
+  tagDescription,
+  isActive,
+  isFolded }
+) {
   const [handCard1, handCard2] = handCards || [];
-  console.log(handCard1)
   return (
     <div className={`player-seat ${isActive ? 'active' : ''} ${isFolded ? 'folded' : ''}`}>
       <div className="player-info">
@@ -13,6 +19,9 @@ export default function PlayerSeat({ player, handCards, isActive, isFolded }) {
         <div className='player-score'>
           <span>Bet: </span>
           <Chip amount={player.bet} />
+        </div>
+        <div>
+          {!!tagDescription && <BlindTag tag={tagDescription}/>}
         </div>
       </div>
       <div className="player-hand">

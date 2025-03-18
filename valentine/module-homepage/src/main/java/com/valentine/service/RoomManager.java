@@ -3,6 +3,7 @@ package com.valentine.service;
 import com.valentine.DTO.CreateRoomRequestDTO;
 import com.valentine.DTO.PlayerDTO;
 import com.valentine.DTO.RoomDTO;
+import com.valentine.model.GameContext;
 import com.valentine.model.Player;
 import com.valentine.model.PokerRoom;
 import com.valentine.model.PokerTable;
@@ -78,10 +79,10 @@ public class RoomManager {
                 .getPlayers();
     }
 
-    public PokerRoom startPoker(String roomId) {
+    public GameContext startPoker(String roomId) {
         PokerRoom room = rooms.get(roomId);
         room.start();
-        return room;
+        return room.getGameContext();
     }
 
     public List<PokerRoom> getRooms() {

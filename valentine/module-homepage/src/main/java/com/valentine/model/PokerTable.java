@@ -192,7 +192,7 @@ public class PokerTable {
 
     private List<GamePlayer> initialUsers() {
         List<GamePlayer> gamePlayers = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 5; i++) {
             GamePlayer user = new GamePlayer(
                     "player" + i,
                     "player" + i,
