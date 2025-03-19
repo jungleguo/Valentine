@@ -93,11 +93,22 @@ public class TexasHoldemEngine {
         var activePlayers = getActivePlayers();
         // Active user 只有一个人，则 Active User 自动成为 Winner
         if (activePlayers.size() == 1) {
+            // 下一个 Active 的 User 就是winner
             var winner = getNextActivePlayer(currentPlayer);
-            // 修改游戏状态
+            // 结算 winner 的筹码
             settlement();
+            // 更新 context
+            this.gameContext.setActionPlayer(winner.toPlayerDTO());
+            var winners = new ArrayList<GamePlayer>();
+            winners.add(winner);
+            this.gameContext.setWinners(winners);
+            // 更新游戏状态
+            processGameState(GameState.SHOWDOWN);
+
+            return this.gameContext;
         }
 
+        // 处理 1 人 All in, 其余人还有筹码的情况
         // 如果剩下的 Active user 大于 2 人，并且有 all in 的 user, 那就要为没有 all in 的 player 开边池
         if (activePlayers.size() > 2 && activePlayers.stream().anyMatch(i -> i.chips == 0)) {
             var sidePoolId = this.pools.size();
@@ -114,7 +125,7 @@ public class TexasHoldemEngine {
         if (this.currentState == GameState.SHOWDOWN) {
             settlement();
         } else if (this.currentState == GameState.GAME_OVER) {
-            // 重新初始化
+
         } else {
             // 需要将 Context 中的行动 User移动到下一位
             this.currentActionPlayer = getNextActivePlayer(this.currentActionPlayer);

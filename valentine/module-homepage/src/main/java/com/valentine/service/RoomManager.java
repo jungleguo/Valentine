@@ -3,10 +3,7 @@ package com.valentine.service;
 import com.valentine.DTO.CreateRoomRequestDTO;
 import com.valentine.DTO.PlayerDTO;
 import com.valentine.DTO.RoomDTO;
-import com.valentine.model.GameContext;
-import com.valentine.model.Player;
-import com.valentine.model.PokerRoom;
-import com.valentine.model.PokerTable;
+import com.valentine.model.*;
 import jakarta.websocket.Session;
 import jakarta.ws.rs.NotFoundException;
 import lombok.AllArgsConstructor;
@@ -51,9 +48,26 @@ public class RoomManager {
         room.setRoomId(roomId);
         room.setRoomName(requestDTO.roomName);
         room.setCreatorId(requestDTO.creatorId);
+        room.setMaxPlayers(requestDTO.maxPlayers);
+        var gamePlayers = initialUsers(requestDTO.maxPlayers);
+        room.setGamePlayers(gamePlayers);
         rooms.put(roomId, room);
 
         return room.ToDTO();
+    }
+
+    private List<GamePlayer> initialUsers(int maxPlayers) {
+        List<GamePlayer> gamePlayers = new ArrayList<>();
+        for (int i = 0; i < maxPlayers; i++) {
+            GamePlayer user = new GamePlayer(
+                    "player" + i,
+                    "player" + i,
+                    1000
+            );
+            gamePlayers.add(user);
+        }
+
+        return gamePlayers;
     }
 
     public PokerRoom joinRoom(String roomId, Player player) throws IllegalStateException {

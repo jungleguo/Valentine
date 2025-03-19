@@ -20,6 +20,7 @@ public class PokerTable {
     @JsonIgnore
     private Queue<Poker> shuffledDeck;
     private final Map<Integer, Player> players = new HashMap<>();
+    private final List<GamePlayer> gamePlayers = new ArrayList<>();
     private final Map<Integer, ChipPool> chipPools = new HashMap<>();
     private final List<Poker> communityPokers = new ArrayList<>();
     private TexasHoldemEngine holdemEngine = new TexasHoldemEngine();
@@ -29,8 +30,10 @@ public class PokerTable {
         this.deck = Poker.createDeck();
     }
 
-    PokerTable(Map<Integer, Player> players) {
+    PokerTable(Map<Integer, Player> players,
+               List<GamePlayer> gamePlayers) {
         this.players.putAll(players);
+        this.gamePlayers.addAll(gamePlayers);
     }
 
     public GameContext getGameContext() {
@@ -44,8 +47,7 @@ public class PokerTable {
         if (deck == null)
             deck = Poker.createDeck();
 
-        var gamePlayers = initialUsers();
-        this.holdemEngine.initilizeGame(gamePlayers);
+        this.holdemEngine.initilizeGame(this.gamePlayers);
         this.holdemEngine.startGame();
 
     }
@@ -188,20 +190,6 @@ public class PokerTable {
         for (ChipPool pool : chipPools.values()) {
             pool.onPlayerBet(player);
         }
-    }
-
-    private List<GamePlayer> initialUsers() {
-        List<GamePlayer> gamePlayers = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            GamePlayer user = new GamePlayer(
-                    "player" + i,
-                    "player" + i,
-                    1000
-            );
-            gamePlayers.add(user);
-        }
-
-        return gamePlayers;
     }
 
     private int chooseDealer() {

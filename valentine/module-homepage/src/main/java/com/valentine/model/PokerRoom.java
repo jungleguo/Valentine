@@ -16,6 +16,7 @@ public class PokerRoom {
     private Map<Integer, Player> players = new ConcurrentHashMap<>();
     private int maxPlayers = 8;
     private RoomStatus status = RoomStatus.WAITING;
+    private List<GamePlayer> gamePlayers = new ArrayList<>();
 
     private PokerTable pokerTable = new PokerTable();
 
@@ -55,9 +56,17 @@ public class PokerRoom {
         return lastActiveTime;
     }
 
+    public int getMaxPlayers() {
+        return this.maxPlayers;
+    }
+
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
+
     public void start() {
         if (pokerTable == null)
-            pokerTable = new PokerTable(this.players);
+            pokerTable = new PokerTable(this.players, this.gamePlayers);
 
         pokerTable.startGame();
     }
@@ -87,6 +96,14 @@ public class PokerRoom {
         this.roomName = roomName;
     }
 
+    public List<GamePlayer> getGamePlayers() {
+        return gamePlayers;
+    }
+
+    public void setGamePlayers(List<GamePlayer> gamePlayers) {
+        this.gamePlayers = gamePlayers;
+    }
+
     public enum RoomStatus {WAITING, IN_GAME, CLOSED}
 
     // 构造器/getters/setters
@@ -99,6 +116,7 @@ public class PokerRoom {
         dto.roomId = this.roomId;
         dto.roomName = this.roomName;
         dto.maxPlayers = this.maxPlayers;
+        dto.players = this.gamePlayers.stream().map(GamePlayer::toPlayerDTO).toList();
         return dto;
     }
 }

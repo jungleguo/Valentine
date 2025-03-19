@@ -9,8 +9,9 @@ import "./poker.css"
 
 export default function PokerTable() {
   const { roomId } = useParams();
-console.log("Current roomId", roomId)
+  console.log("Current roomId", roomId)
   const {
+    actionUser,
     requiredCallAmount,
     currentUser,
     currentHand,
@@ -31,18 +32,18 @@ console.log("Current roomId", roomId)
     if (!player)
       return null;
 
-    if (player.userId == smallBlind.userId)
+    if (!!smallBlind && player.userId == smallBlind.userId)
       return "S";
 
-    if (player.userId == bigBlind.userId)
+    if (!!bigBlind && player.userId == bigBlind.userId)
       return "B";
 
-    if (player.userId == dealer.userId)
+    if (!!dealer && player.userId == dealer.userId)
       return "D";
 
     return null;
   }
-
+  console.log("Poker table", players)
   return (
     <div className="poker-table">
 
@@ -52,7 +53,7 @@ console.log("Current roomId", roomId)
             key={index}
             player={player}
             tagDescription={getBlindTag(player)}
-            isActive={player.userId === currentUser.userId}
+            isActive={!!actionUser && player.userId === actionUser.userId}
             isFolded={player.isFolded}
           />
         ))}

@@ -30,6 +30,7 @@ export default function usePokerEngine(roomId) {
     const [error, setError] = useState();
 
     useEffect(() => {
+        refreshRoom(roomId);
         refreshTable(roomId);
         const interval = setInterval(() => refreshTable(roomId), 60000);
         return () => clearInterval(interval);
@@ -72,7 +73,20 @@ export default function usePokerEngine(roomId) {
     const refreshTable = async (roomId) => {
         try {
             var response = await axios.get(`http://localhost:8080/api/rooms/${roomId}/pokertable`)
-            initializeGame(response.data);
+            if (response.data)
+                initializeGame(response.data);
+        } catch (err) {
+            setError(err);
+        }
+    }
+
+    const refreshRoom = async (roomId) => {
+        try {
+            var response = await axios.get(`http://localhost:8080/api/rooms/${roomId}`);
+            if (response.data) {
+                console.log("Current room", response);
+                setPalyers(response.data.gamePlayers);
+            }
         } catch (err) {
             setError(err);
         }
@@ -101,7 +115,7 @@ export default function usePokerEngine(roomId) {
         } else if (amount >= requiredCallAmount * 2 && amount < player.chips) {
             userAction = "RAISE";
         }
-debugger
+        debugger
         let poolId = pools[0].id;
 
         debugger
@@ -126,6 +140,7 @@ debugger
     };
 
     return {
+        actionUser,
         requiredCallAmount,
         currentUser: actionUser,
         currentHand,
