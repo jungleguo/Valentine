@@ -6,6 +6,7 @@ import PotDisplay from '../../components/game/PotDisplay'
 import GameStartButton from '../../components/game/GameStartButton';
 import { useParams } from 'react-router-dom';
 import "./poker.css"
+import PotPool from '../../components/game/PotPool';
 
 export default function PokerTable() {
   const { roomId } = useParams();
@@ -43,6 +44,8 @@ export default function PokerTable() {
 
     return null;
   }
+
+  console.log("RequireCallAmount", requiredCallAmount);
   console.log("Poker table", players)
   return (
     <div className="poker-table">
@@ -52,6 +55,7 @@ export default function PokerTable() {
           <PlayerSeat
             key={index}
             player={player}
+            handCards={player?.cards}
             tagDescription={getBlindTag(player)}
             isActive={!!actionUser && player.userId === actionUser.userId}
             isFolded={player.isFolded}
@@ -64,6 +68,9 @@ export default function PokerTable() {
           <div>
             Current Phase: {gameState}
           </div>
+        }
+        {
+            <PotPool PotPools={pools} />
         }
       </div>
       <CommunityCards cards={communityCards} phase={gameState} />

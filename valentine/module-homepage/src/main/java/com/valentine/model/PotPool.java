@@ -26,12 +26,21 @@ public class PotPool {
     }
 
     public void onSettlement() {
-        this.winners = this.players.stream()
+        var activatedPlayers = this.players.stream()
                 .filter(i -> i.isActive)
-                .collect(Collectors.groupingBy(i -> i.best))
-                .entrySet()
-                .stream().findFirst()
-                .map(Map.Entry::getValue).get();
+                .toList();
+
+        if(activatedPlayers.size() == 1) {
+            this.winners = activatedPlayers;
+        } else {
+            this.winners = activatedPlayers
+                    .stream()
+                    .collect(Collectors.groupingBy(i -> i.best))
+                    .entrySet()
+                    .stream().findFirst()
+                    .map(Map.Entry::getValue).get();
+        }
+
         var settledPot = this.pot / this.winners.size();
         for (GamePlayer winner : this.winners) {
             winner.chips += settledPot;

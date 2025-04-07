@@ -19,7 +19,9 @@ public class PokerTable {
     private List<Poker> deck;
     @JsonIgnore
     private Queue<Poker> shuffledDeck;
+
     private final Map<Integer, Player> players = new HashMap<>();
+
     private final List<GamePlayer> gamePlayers = new ArrayList<>();
     private final Map<Integer, ChipPool> chipPools = new HashMap<>();
     private final List<Poker> communityPokers = new ArrayList<>();
@@ -49,7 +51,10 @@ public class PokerTable {
 
         this.holdemEngine.initilizeGame(this.gamePlayers);
         this.holdemEngine.startGame();
+    }
 
+    public GameContext nextGame(){
+        return this.holdemEngine.nextGame();
     }
 
     public GameContext processAction(GameUserAction action) {

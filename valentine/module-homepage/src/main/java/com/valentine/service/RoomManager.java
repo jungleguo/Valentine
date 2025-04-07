@@ -64,6 +64,9 @@ public class RoomManager {
                     "player" + i,
                     1000
             );
+            if (i == 1) {
+                user.chips = 40;
+            }
             gamePlayers.add(user);
         }
 
@@ -97,6 +100,16 @@ public class RoomManager {
         PokerRoom room = rooms.get(roomId);
         room.start();
         return room.getGameContext();
+    }
+
+    public GameContext nextGame(String roomId) {
+        var roomOptional = this.getRoom(roomId);
+        if (roomOptional.isPresent()){
+            var room = roomOptional.get();
+            return room.nextGame();
+        }else {
+            throw new NotFoundException("Room doesn't exits.");
+        }
     }
 
     public List<PokerRoom> getRooms() {

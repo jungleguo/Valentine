@@ -91,12 +91,35 @@ public class GameContext {
         }
     }
 
+    public void  playersShowHands(GamePlayer player) {
+        var currentResult = this.players.stream().filter(i -> i.userId.equals(player.id)).findFirst();
+        if (currentResult.isPresent()) {
+            var existsPlayer = currentResult.get();
+            existsPlayer.cards = player.holeCards.stream().map(Poker::ToCardDTO).toList();
+        }
+    }
+
     public void updateCommunityCards(List<Poker> communityCards) {
         for (Poker card : communityCards) {
             var existsCard = this.communityCards.stream().filter(i -> i.getId().equals(card.getId())).findFirst();
             if (existsCard.isEmpty())
                 this.communityCards.add(card);
         }
+    }
+
+    public void nextGame() {
+        this.state = GameState.PRE_FLOP;
+        this.currentBetLevel = 0;
+        this.requiredCallAmount = 0;
+        this.dealerIndex = 0;
+        this.players.forEach(PlayerDTO::nextGame);
+        this.pools.clear();
+        this.communityCards.clear();
+        this.actionPlayer = null;
+        this.lastRaiser = null;
+        this.dealer = null;
+        this.smallBlind = null;
+        this.bigBlind = null;
     }
 
     public void setWinners(List<GamePlayer> players) {

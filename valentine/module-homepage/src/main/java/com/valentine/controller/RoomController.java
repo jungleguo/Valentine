@@ -98,6 +98,13 @@ public class RoomController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{roomId}/pokertable/nextgame")
+    public ResponseEntity<?> nextGame(@PathVariable String roomId){
+        var room = roomManager.getRoom(roomId);
+        return room.map(r -> ResponseEntity.ok((r.nextGame())))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("")
     public ResponseEntity<?> getRooms() {
         List<PokerRoom> rooms = roomManager.getRooms();

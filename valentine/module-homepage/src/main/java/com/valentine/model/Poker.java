@@ -1,5 +1,6 @@
 package com.valentine.model;
 
+import com.valentine.DTO.CardDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -55,4 +56,7 @@ public class Poker implements Comparable<Poker> {
         }).collect(Collectors.toList());
     }
 
+    public CardDTO ToCardDTO() {
+        return new CardDTO(this.id, this.rank, this.suit);
+    }
 }

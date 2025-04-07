@@ -1,5 +1,6 @@
 package com.valentine.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.valentine.DTO.RoomDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -13,9 +14,11 @@ public class PokerRoom {
     private String creatorId;
     private Instant createdTime = Instant.now();
     private Instant lastActiveTime = Instant.now();
+
     private Map<Integer, Player> players = new ConcurrentHashMap<>();
     private int maxPlayers = 8;
     private RoomStatus status = RoomStatus.WAITING;
+
     private List<GamePlayer> gamePlayers = new ArrayList<>();
 
     private PokerTable pokerTable = new PokerTable();
@@ -65,10 +68,14 @@ public class PokerRoom {
     }
 
     public void start() {
-        if (pokerTable == null)
+        if (pokerTable.gameContext == null)
             pokerTable = new PokerTable(this.players, this.gamePlayers);
 
         pokerTable.startGame();
+    }
+
+    public  GameContext nextGame() {
+        return pokerTable.nextGame();
     }
 
     public PokerTable handleUserAction(int index, UserAction action) {

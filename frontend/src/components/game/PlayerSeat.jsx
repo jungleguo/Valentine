@@ -14,11 +14,11 @@ export default function PlayerSeat({
       <div className="player-info">
         <div className='player-score'>
           <span>Stack:</span>
-          <Chip amount={player.stack} />
+          <Chip amount={player?.chips} />
         </div>
         <div className='player-score'>
           <span>Bet: </span>
-          <Chip amount={player.bet} />
+          <Chip amount={player?.currentBets} />
         </div>
         <div>
           {!!tagDescription && <BlindTag tag={tagDescription}/>}

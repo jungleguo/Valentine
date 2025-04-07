@@ -32,7 +32,7 @@ export default function usePokerEngine(roomId) {
     useEffect(() => {
         refreshRoom(roomId);
         refreshTable(roomId);
-        const interval = setInterval(() => refreshTable(roomId), 60000);
+        const interval = setInterval(() => refreshTable(roomId), 10000);
         return () => clearInterval(interval);
     }, []);
 
@@ -45,6 +45,8 @@ export default function usePokerEngine(roomId) {
         setCommunityCards(state.communityCards);
         setPools(state.pools);
         setGameState(state.state);
+        setRequiredCallAmount(state.requiredCallAmount);
+        setCurrentBetLevel(state.currentBetLevel);
         setCurrentHand([
             {
                 "id": "10♠",
@@ -109,16 +111,15 @@ export default function usePokerEngine(roomId) {
             userAction = "CHECK";
         else if (amount >= player.chips) {
             amount = player.chips;
-            userAction = "ALLIN";
+            userAction = "ALL_IN";
         } else if (amount == requiredCallAmount && amount < player.chips) {
             userAction = "CALL";
         } else if (amount >= requiredCallAmount * 2 && amount < player.chips) {
             userAction = "RAISE";
         }
-        debugger
+        
         let poolId = pools[0].id;
 
-        debugger
         const action = {
             userId: player.userId,
             action: userAction,
