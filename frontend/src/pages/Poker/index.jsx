@@ -4,13 +4,13 @@ import PlayerSeat from '../../components/game/PlayerSeat';
 import ActionControls from '../../components/game/ActionControls';
 import PotDisplay from '../../components/game/PotDisplay'
 import GameStartButton from '../../components/game/GameStartButton';
+import GameActionButton from '../../components/game/GameActionButton';
 import { useParams } from 'react-router-dom';
 import "./poker.css"
 import PotPool from '../../components/game/PotPool';
 
 export default function PokerTable() {
   const { roomId } = useParams();
-  console.log("Current roomId", roomId)
   const {
     actionUser,
     requiredCallAmount,
@@ -26,7 +26,8 @@ export default function PokerTable() {
     gameState,
     handleBet,
     handleFold,
-    handleStart
+    handleStart,
+    handleNextGame
   } = usePokerEngine(roomId);
 
   const getBlindTag = (player) => {
@@ -57,7 +58,7 @@ export default function PokerTable() {
             player={player}
             handCards={player?.cards}
             tagDescription={getBlindTag(player)}
-            isActive={!!actionUser && player.userId === actionUser.userId}
+            isActive={!!actionUser && !player?.isAllin && player.userId === actionUser.userId}
             isFolded={player.isFolded}
           />
         ))}
@@ -70,7 +71,7 @@ export default function PokerTable() {
           </div>
         }
         {
-            <PotPool PotPools={pools} />
+          <PotPool PotPools={pools} />
         }
       </div>
       <CommunityCards cards={communityCards} phase={gameState} />
@@ -91,6 +92,13 @@ export default function PokerTable() {
           error={''}
           onStart={() => handleStart(roomId)}
           playersCount={2}
+        />
+      }
+      {
+        <GameActionButton
+          roomId={roomId}
+          buttonText={'下一局'}
+          action={handleNextGame}
         />
       }
       {

@@ -8,6 +8,7 @@ public class PlayerDTO {
     public String userName;
     public boolean isActive;
     public boolean actedThisRound;
+    public boolean isAllIn;
     public int chips;
     public int currentBets;
     public List<CardDTO> cards = new ArrayList<>();
@@ -19,5 +20,8 @@ public class PlayerDTO {
 
     public void nextGame() {
         this.cards = new ArrayList<>();
+        this.currentBets = 0;
+        this.actedThisRound = false;
+        this.isAllIn = false;
     }
 }

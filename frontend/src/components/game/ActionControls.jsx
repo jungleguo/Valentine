@@ -21,23 +21,28 @@ export default function ActionControls({
   const validate = (amount) => {
     const errors = [];
 
-    if (isFirstInput && amount < 2 * requiredCallAmount) {
-      errors.push(`首次加注至少需要${2 * requiredCallAmount}`);
+    if (amount === requiredCallAmount){
+      setBetAmount(requiredCallAmount);
+      return errors;
     }
 
     if (amount < requiredCallAmount) {
       errors.push(`金额不能小于${requiredCallAmount}`);
     }
 
+    if (isFirstInput && amount > requiredCallAmount && amount < 2 * requiredCallAmount) {
+      errors.push(`首次加注至少需要${2 * requiredCallAmount}`);
+    }
+
     if (amount % 5 !== 0) {
       errors.push(`每次涨幅不能小于 $5.`)
     }
+
     return errors;
   }
 
   const handleChange = (e) => {
     const value = e.target.value;
-
     if (value === '') {
       setBetAmount(requiredCallAmount);
       setError('');
@@ -45,25 +50,35 @@ export default function ActionControls({
     }
 
     const num = Number(value);
-
-    if (isFirstInput) {
-      if (num < 2 * requiredCallAmount) {
-        setError(`首次加注至少需要 ${2 * requiredCallAmount}`);
-      } else {
-        setError('');
-        setIsFirstInput(false);
-      }
-    }
+    const errors = validate(num);
 
     setBetAmount(num);
+    setError(errors.join(', '));
+
+    if (errors.length === 0 && isFirstInput) {
+      setIsFirstInput(false);
+    }
   }
 
   const isDisabled = () => {
-    return error || 
-      betAmount % 5 !== 0 || 
+    return error ||
+      betAmount % 5 !== 0 ||
       betAmount < requiredCallAmount ||
-      (isFirstInput && betAmount < 2 * requiredCallAmount)
+      (isFirstInput && betAmount > requiredCallAmount && betAmount < 2 * requiredCallAmount)
   };
+
+  const handleBet = () => {
+    const errors = validate(betAmount);
+
+    if (errors.length > 0) {
+      setError(errors.join(', '));
+      return;
+    }
+
+    onBet({ roomId, player: currentUser, amount: betAmount });
+    setIsFirstInput(false);
+    setError('');
+  }
 
   return (
     <div className="controls">
@@ -71,14 +86,14 @@ export default function ActionControls({
         <>
           <input
             type="number"
-            value={betAmount === requiredCallAmount ? '' : betAmount}
+            value={betAmount === requiredCallAmount ? requiredCallAmount : betAmount}
             onChange={handleChange}
             placeholder={`${requiredCallAmount}`}
-            min={isFirstInput ? 2 * requiredCallAmount : 0}
+            min={isFirstInput ? 2 * requiredCallAmount : requiredCallAmount}
             step="5"
           />
           {/* {error && <div className="error-message">{error}</div>} */}
-          <button onClick={() => onBet({ roomId, player: currentUser, amount: betAmount })}>Bet</button>
+          <button disabled={!!isDisabled()} onClick={handleBet}>Bet</button>
           <button onClick={() => onFold({ roomId, player: currentUser })}>Fold</button>
         </>
       )}

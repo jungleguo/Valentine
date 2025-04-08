@@ -77,6 +77,8 @@ public class GameContext {
             currentPool.pot = dto.pot;
             currentPool.players = dto.players;
             currentPool.winners = dto.winners;
+        } else {
+            this.pools.put(pool.id, pool.toDTO());
         }
     }
 
@@ -88,6 +90,7 @@ public class GameContext {
             existPlayer.actedThisRound = player.actedThisRound;
             existPlayer.chips = player.chips;
             existPlayer.currentBets = player.currentBet;
+            existPlayer.isAllIn = player.isAllIn;
         }
     }
 

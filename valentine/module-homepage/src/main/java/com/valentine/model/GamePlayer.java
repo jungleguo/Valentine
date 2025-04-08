@@ -14,6 +14,7 @@ public class GamePlayer {
     public boolean isActive = true;
     public EvaluatedHand best;
     public boolean actedThisRound = false;
+    public boolean isAllIn = false;
 
     public GamePlayer(
             String id,
@@ -34,6 +35,7 @@ public class GamePlayer {
         playerDTO.userId = this.id;
         playerDTO.userName = this.username;
         playerDTO.isActive = this.isActive;
+        playerDTO.isAllIn = this.isAllIn;
         playerDTO.actedThisRound = this.actedThisRound;
         playerDTO.chips = this.chips;
         playerDTO.currentBets = this.currentBet;

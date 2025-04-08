@@ -105,6 +105,7 @@ export default function usePokerEngine(roomId) {
     };
 
     const handleBet = ({ roomId, player, amount }) => {
+
         let userAction = "CALL";
 
         if (requiredCallAmount == 0 && amount == 0)
@@ -117,8 +118,8 @@ export default function usePokerEngine(roomId) {
         } else if (amount >= requiredCallAmount * 2 && amount < player.chips) {
             userAction = "RAISE";
         }
-        
-        let poolId = pools[0].id;
+
+        let poolId = getLargestPoolId();
 
         const action = {
             userId: player.userId,
@@ -128,6 +129,15 @@ export default function usePokerEngine(roomId) {
         };
         handleUserAction({ roomId, action });
     };
+
+    const getLargestPoolId = () => {
+        let poolId = 0;
+        for (let p in Object.getOwnPropertyNames(pools)) {
+            if (poolId < pools[p].id)
+                poolId = pools[p].id;
+        }
+        return poolId;
+    }
 
     // 弃牌处理
     const handleFold = ({ roomId, player }) => {
@@ -139,6 +149,15 @@ export default function usePokerEngine(roomId) {
         };
         handleUserAction({ roomId, action });
     };
+
+    const handleNextGame = async ({ roomId }) => {
+        try {
+            var response = await axios.get(`http://localhost:8080/api/rooms/${roomId}/pokertable/nextgame`);
+            initializeGame(response.data);
+        } catch (err) {
+            setError(err);
+        }
+    }
 
     return {
         actionUser,
@@ -155,6 +174,7 @@ export default function usePokerEngine(roomId) {
         gameState,
         handleBet,
         handleFold,
-        handleStart
+        handleStart,
+        handleNextGame
     }
 }

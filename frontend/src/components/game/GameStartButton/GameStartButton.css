@@ -1,60 +1,62 @@
 .start-game-section {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
+  position: fixed;
+  bottom: 20px;
+  left: 80%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.start-button {
+  padding: 15px 40px;
+  font-size: 20px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: #4a5568;
+  color: white;
+  position: relative;
+}
+
+.start-button.active {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.start-button.active:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+}
+
+.start-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.loader {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  .start-button {
-    padding: 15px 40px;
-    font-size: 20px;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: all 0.3s;
-    background: #4a5568;
-    color: white;
-    position: relative;
-  }
-  
-  .start-button.active {
-    background: linear-gradient(135deg, #48bb78, #38a169);
-    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
-  }
-  
-  .start-button.active:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
-  }
-  
-  .start-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-  
-  .loader {
-    width: 24px;
-    height: 24px;
-    border: 3px solid #fff;
-    border-radius: 50%;
-    border-top-color: transparent;
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
-  }
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  .error-message {
-    color: #e53e3e;
-    margin-top: 10px;
-    font-size: 14px;
-  }
-  
-  .start-hint {
-    margin-top: 8px;
-    font-size: 14px;
-    color: #718096;
-  }
+}
+
+.error-message {
+  color: #e53e3e;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.start-hint {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #718096;
+}

@@ -90,8 +90,12 @@ public class TexasHoldemEngine {
         if (opool.isEmpty())
             throw new NotFoundException("筹码池不存在");
 
-        if (currentPlayer.chips < action.bet && action.action != PlayerAction.ALL_IN) {
+        if (currentPlayer.chips <= action.bet && action.action != PlayerAction.ALL_IN) {
             action.action = PlayerAction.ALL_IN;
+        }
+
+        if (!currentPlayer.isAllIn && action.action == PlayerAction.ALL_IN) {
+            currentPlayer.isAllIn = true;
         }
 
         var currentPool = opool.get();
@@ -121,18 +125,18 @@ public class TexasHoldemEngine {
             return this.gameContext;
         }
 
+        // 配平之后，处理是否需要推进游戏
+        if (isBalanced()) {
+            processGameState(this.currentState);
+        }
+
         // 处理 1 人 All in, 其余人还有筹码的情况
         // 如果剩下的 Active user 大于 2 人，并且有 all in 的 user, 那就要为没有 all in 的 player 开边池
-        if (activePlayers.size() > 2 && activePlayers.stream().anyMatch(i -> i.chips == 0)) {
+        if (activePlayers.size() > 2 && currentPlayer.isAllIn ) {
             var sidePoolId = this.pools.size();
             var sidePotPool = new PotPool(sidePoolId);
             this.pools.put(sidePoolId, sidePotPool);
             this.gameContext.updatePool(sidePotPool);
-        }
-
-        // 配平之后，处理是否需要推进游戏
-        if (isBalanced()) {
-            processGameState(this.currentState);
         }
 
         if (this.currentState == GameState.SHOWDOWN) {
@@ -140,6 +144,8 @@ public class TexasHoldemEngine {
             settlement();
         } else if (this.currentState == GameState.GAME_OVER) {
             // Game Over 以后需要开启下一局游戏
+            playerShowHands();
+            settlement();
             return nextGame();
         } else {
             // 需要将 Context 中的行动 User移动到下一位
@@ -153,10 +159,12 @@ public class TexasHoldemEngine {
 
     private boolean isBalanced() {
         boolean allActed = players.stream()
+                .filter(i -> !i.isAllIn)
                 .filter(i -> i.isActive)
                 .allMatch(i -> i.actedThisRound);
 
         boolean betsBalanced = players.stream()
+                .filter(i -> !i.isAllIn)
                 .filter(i -> i.isActive)
                 .mapToInt(i -> i.currentBet)
                 .allMatch(bet -> bet == currentBetLevel);
@@ -164,6 +172,7 @@ public class TexasHoldemEngine {
         boolean noPendingRaise = (lastRaiser == null) ||
                 players.stream()
                         .filter(i -> i != lastRaiser)
+                        .filter(i -> !i.isAllIn)
                         .filter(i -> i.isActive)
                         .allMatch(p -> p.currentBet == currentBetLevel);
 
@@ -227,6 +236,7 @@ public class TexasHoldemEngine {
         players.forEach(p -> {
             p.resetRoundState();
             p.isActive = true;
+            p.isAllIn = false;
         });
         deck.shuffle();
         dealHoleCards();
@@ -344,7 +354,7 @@ public class TexasHoldemEngine {
         var playerIndex = this.players.indexOf(player);
         var nextIndex = getNextIndex(playerIndex);
         var nextPlayer = this.players.get(nextIndex);
-        if (!nextPlayer.isActive) {
+        if (!nextPlayer.isActive || nextPlayer.isAllIn) {
             return getNextActivePlayerIndex(nextPlayer);
         }
         return nextIndex;
